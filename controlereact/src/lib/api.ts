@@ -71,13 +71,17 @@ export async function fetchPokemons({
   types?: (string | number)[];
 }): Promise<PokemonsResponse> {
   try {
+    console.log('Fetching pokemons with params:', { page, limit, name, typeId, types });
     const offset = (page - 1) * limit;
     
     const url = `${API_BASE_URL}/pokemon?offset=${offset}&limit=${limit}`;
+    console.log('Fetching from URL:', url);
     const response = await fetch(url, fetchOptions);
     const data = await response.json();
+    console.log('API response count:', data.count);
     
     const pokemonUrls = data.results.map((p: {url: string}) => p.url);
+    console.log(`Got ${pokemonUrls.length} pokemon URLs`);
     
     const pokemonDetailsPromises = pokemonUrls.map((url: string) => 
       fetch(url, fetchOptions)
@@ -90,6 +94,7 @@ export async function fetchPokemons({
     
     const pokemonDetails = await Promise.all(pokemonDetailsPromises);
     const validPokemonDetails = pokemonDetails.filter(p => p !== null);
+    console.log(`Successfully fetched ${validPokemonDetails.length} pokemon details`);
     
     const pokemons = validPokemonDetails.map((pokemon: any) => ({
       id: pokemon.id,
@@ -107,6 +112,7 @@ export async function fetchPokemons({
       filteredPokemons = filteredPokemons.filter(p => 
         p.name.toLowerCase().includes(name.toLowerCase())
       );
+      console.log(`After name filter: ${filteredPokemons.length} pokemons`);
     }
     
     if (types && types.length > 0) {
@@ -115,8 +121,10 @@ export async function fetchPokemons({
           pokemon.types.some((t: PokemonType) => t.id === Number(typeId))
         )
       );
+      console.log(`After type filter: ${filteredPokemons.length} pokemons`);
     }
     
+    console.log(`Returning ${filteredPokemons.length} pokemons`);
     return {
       data: filteredPokemons,
       count: data.count
@@ -235,15 +243,20 @@ async function processEvolutionChain(chain: any): Promise<Pokemon[]> {
 
 export async function fetchPokemonTypes(): Promise<PokemonType[]> {
   try {
+    console.log('Fetching Pokemon types...');
     const response = await fetch(`${API_BASE_URL}/type`, fetchOptions);
     const data = await response.json();
+    console.log('Pokemon types API response:', data);
     
-    return data.results
+    const types = data.results
       .filter((type: {name: string}) => type.name !== 'unknown' && type.name !== 'shadow')
       .map((type: {name: string, url: string}) => ({
         id: extractIdFromUrl(type.url),
         name: type.name
       }));
+    
+    console.log('Processed Pokemon types:', types);
+    return types;
   } catch (error) {
     console.error('Error fetching pokemon types:', error);
     return [];

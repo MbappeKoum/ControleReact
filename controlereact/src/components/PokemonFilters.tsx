@@ -45,14 +45,12 @@ export default function PokemonFilters({
   };
 
   const handleTypeChange = (typeId: number) => {
-    setSelectedTypes((prev) => {
-      const newTypes = prev.includes(typeId)
-        ? prev.filter((id) => id !== typeId)
-        : [...prev, typeId];
-      
-      onTypeChange(newTypes);
-      return newTypes;
-    });
+    const newTypes = selectedTypes.includes(typeId)
+      ? selectedTypes.filter((id) => id !== typeId)
+      : [...selectedTypes, typeId];
+    
+    setSelectedTypes(newTypes);
+    onTypeChange(newTypes);
   };
 
   const handleLimitChange = (e: React.ChangeEvent<HTMLSelectElement>) => {

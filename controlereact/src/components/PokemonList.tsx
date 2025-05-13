@@ -37,7 +37,12 @@ export default function PokemonList() {
       if (reset) {
         setPokemons(response.data);
       } else {
-        setPokemons((prev) => [...prev, ...response.data]);
+        // Add new pokemons, ensuring no duplicates by ID
+        setPokemons((prev) => {
+          const existingIds = new Set(prev.map(p => p.id));
+          const newPokemons = response.data.filter(p => !existingIds.has(p.id));
+          return [...prev, ...newPokemons];
+        });
       }
       
       setHasMore(response.data.length === limit);
