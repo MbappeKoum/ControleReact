@@ -24,3 +24,70 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@keyframes rotate360 {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hover\:rotate-360:hover {
+  animation: rotate360 1s linear;
+}
+
+.group:hover .group-hover\:rotate-360 {
+  animation: rotate360 1s linear;
+}
+
+@keyframes shake {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  20% { transform: translate(-10px, 0) rotate(-5deg); }
+  40% { transform: translate(10px, 0) rotate(5deg); }
+  60% { transform: translate(-10px, 0) rotate(-5deg); }
+  80% { transform: translate(10px, 0) rotate(5deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+.bounce {
+  animation: bounce 0.5s ease-in-out;
+}
+
+@keyframes flash {
+  0%, 50%, 100% { opacity: 1; }
+  25%, 75% { opacity: 0; }
+}
+
+.flash {
+  animation: flash 0.5s ease-in-out;
+}
+
+@keyframes catch {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.5); opacity: 0.5; }
+  100% { transform: scale(0); opacity: 0; }
+}
+
+.catch {
+  animation: catch 1s forwards;
+}
+
+@keyframes appear {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.appear {
+  animation: appear 0.5s forwards;
+}

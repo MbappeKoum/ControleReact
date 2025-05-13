@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { PokemonType, fetchPokemonTypes } from '@/lib/api';
+import SearchBar from './SearchBar';
 
 interface PokemonFiltersProps {
   onNameChange: (name: string) => void;
@@ -64,19 +65,12 @@ export default function PokemonFilters({
       <h2 className="text-xl font-bold mb-4">Filters</h2>
       
       <div className="space-y-4">
-        {/* Name filter */}
+        {/* Name filter with autocomplete */}
         <div>
           <label htmlFor="name-filter" className="block text-sm font-medium mb-1">
             Pokemon Name
           </label>
-          <input
-            id="name-filter"
-            type="text"
-            value={name}
-            onChange={handleNameChange}
-            placeholder="Search by name..."
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
-          />
+          <SearchBar onSelect={onNameChange} />
         </div>
         
         {/* Limit filter */}

@@ -1,7 +1,11 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePokemon } from '@/lib/PokemonContext';
 
 export default function Navbar() {
+  const { caughtPokemon } = usePokemon();
   return (
     <nav className="bg-white dark:bg-gray-800 shadow-md">
       <div className="container mx-auto px-4 py-3">
@@ -47,6 +51,24 @@ export default function Navbar() {
             >
               Pokémon List
             </Link>
+            
+            <div className="flex items-center bg-red-500 text-white px-3 py-1 rounded-full">
+              <svg 
+                className="w-4 h-4 mr-1" 
+                fill="currentColor" 
+                viewBox="0 0 20 20" 
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path 
+                  fillRule="evenodd" 
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12zm0-8a2 2 0 100-4 2 2 0 000 4z" 
+                  clipRule="evenodd" 
+                />
+              </svg>
+              <span className="text-sm font-medium">
+                {caughtPokemon.length} Caught
+              </span>
+            </div>
           </div>
         </div>
       </div>

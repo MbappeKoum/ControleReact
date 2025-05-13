@@ -1,4 +1,5 @@
 const API_BASE_URL = 'https://pokeapi.co/api/v2';
+const LANGUAGE = 'fr';
 
 const fetchOptions: RequestInit = {
   headers: {
@@ -96,16 +97,40 @@ export async function fetchPokemons({
     const validPokemonDetails = pokemonDetails.filter(p => p !== null);
     console.log(`Successfully fetched ${validPokemonDetails.length} pokemon details`);
     
-    const pokemons = validPokemonDetails.map((pokemon: any) => ({
-      id: pokemon.id,
-      name: pokemon.name,
-      image: pokemon.sprites.other?.['official-artwork']?.front_default || 
-             pokemon.sprites.front_default,
-      types: pokemon.types.map((t: { type: { url: string; name: string } }) => ({
-        id: extractIdFromUrl(t.type.url),
-        name: t.type.name
-      }))
-    }));
+    const pokemonSpeciesPromises = validPokemonDetails.map((pokemon: any) => 
+      fetch(pokemon.species.url, fetchOptions)
+        .then(res => res.json())
+        .catch(err => {
+          console.error(`Error fetching pokemon species from ${pokemon.species.url}:`, err);
+          return null;
+        })
+    );
+    
+    const pokemonSpecies = await Promise.all(pokemonSpeciesPromises);
+    
+    const pokemons = validPokemonDetails.map((pokemon: any, index: number) => {
+      // Get French name from species data if available
+      let name = pokemon.name;
+      const species = pokemonSpecies[index];
+      
+      if (species && species.names) {
+        const frenchName = species.names.find((n: any) => n.language.name === LANGUAGE);
+        if (frenchName) {
+          name = frenchName.name;
+        }
+      }
+      
+      return {
+        id: pokemon.id,
+        name: name,
+        image: pokemon.sprites.other?.['official-artwork']?.front_default || 
+               pokemon.sprites.front_default,
+        types: pokemon.types.map((t: { type: { url: string; name: string } }) => ({
+          id: extractIdFromUrl(t.type.url),
+          name: t.type.name
+        }))
+      };
+    });
     
     let filteredPokemons = pokemons;
     if (name) {
@@ -175,9 +200,25 @@ export async function fetchPokemonById(id: string | number): Promise<PokemonDeta
       console.error('Error fetching evolution chain:', evolutionError);
     }
     
+    
+    let name = pokemon.name;
+    try {
+      const speciesResponse = await fetch(pokemon.species.url, fetchOptions);
+      const speciesData = await speciesResponse.json();
+      
+      if (speciesData.names) {
+        const frenchName = speciesData.names.find((n: any) => n.language.name === LANGUAGE);
+        if (frenchName) {
+          name = frenchName.name;
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching Pokemon species data:', error);
+    }
+    
     return {
       id: pokemon.id,
-      name: pokemon.name,
+      name: name,
       image: pokemon.sprites.other?.['official-artwork']?.front_default || 
              pokemon.sprites.front_default,
       types: types,
@@ -213,9 +254,25 @@ async function processEvolutionChain(chain: any): Promise<Pokemon[]> {
         const response = await fetch(`${API_BASE_URL}/pokemon/${id}`, fetchOptions);
         const pokemon = await response.json();
         
+        
+        let name = pokemon.name;
+        try {
+          const speciesResponse = await fetch(pokemon.species.url, fetchOptions);
+          const speciesData = await speciesResponse.json();
+          
+          if (speciesData.names) {
+            const frenchName = speciesData.names.find((n: any) => n.language.name === LANGUAGE);
+            if (frenchName) {
+              name = frenchName.name;
+            }
+          }
+        } catch (error) {
+          console.error(`Error fetching evolution pokemon species data for ${id}:`, error);
+        }
+        
         evolutions.push({
           id: pokemon.id,
-          name: pokemon.name,
+          name: name,
           image: pokemon.sprites.other?.['official-artwork']?.front_default || 
                  pokemon.sprites.front_default,
           types: pokemon.types.map((t: {type: {url: string, name: string}}) => ({
