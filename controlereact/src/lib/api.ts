@@ -109,7 +109,6 @@ export async function fetchPokemons({
     const pokemonSpecies = await Promise.all(pokemonSpeciesPromises);
     
     const pokemons = validPokemonDetails.map((pokemon: any, index: number) => {
-      // Get French name from species data if available
       let name = pokemon.name;
       const species = pokemonSpecies[index];
       
