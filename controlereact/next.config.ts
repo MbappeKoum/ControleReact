@@ -3,12 +3,11 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['nestjs-pokedex-api.vercel.app'],
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
+      { protocol: 'https', hostname: 'raw.githubusercontent.com' },
+      { protocol: 'https', hostname: 'static.wikia.nocookie.net' },
+      { protocol: 'https', hostname: 'pokeapi.co' },
+      { protocol: 'https', hostname: 'assets.pokemon.com' },
     ],
   },
 };
