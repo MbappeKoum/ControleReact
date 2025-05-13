@@ -8,11 +8,28 @@ interface PokemonCardProps {
   pokemon: Pokemon;
 }
 
+export const POKEMON_COLORS: Record<string, string> = {
+  black: 'bg-gray-800 text-white',
+  blue: 'bg-blue-500 text-white',
+  brown: 'bg-yellow-800 text-white',
+  gray: 'bg-gray-500 text-white',
+  green: 'bg-green-500 text-white',
+  pink: 'bg-pink-400 text-white',
+  purple: 'bg-purple-500 text-white',
+  red: 'bg-red-500 text-white',
+  white: 'bg-gray-100 text-gray-800',
+  yellow: 'bg-yellow-400 text-gray-800',
+};
+
 export default function PokemonCard({ pokemon }: PokemonCardProps) {
   const { isCaught, catchPokemon, releasePokemon } = usePokemon();
   const [catching, setCatching] = useState(false);
   const [animation, setAnimation] = useState('');
   const caught = isCaught(pokemon.id);
+  
+  const cardColor = pokemon.color && POKEMON_COLORS[pokemon.color] 
+    ? POKEMON_COLORS[pokemon.color] 
+    : 'bg-white dark:bg-gray-800';
 
   const handleCatch = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -55,7 +72,7 @@ export default function PokemonCard({ pokemon }: PokemonCardProps) {
 
   return (
     <Link href={`/pokemons/${pokemon.id}`}>
-      <div className="group bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105 hover:shadow-lg relative">
+      <div className={`group ${cardColor} rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105 hover:shadow-lg relative`}>
         <div className="p-4 flex flex-col items-center">
           <div className={`relative w-40 h-40 transition-transform duration-500 group-hover:rotate-360 ${animation}`}>
             <Image
@@ -74,7 +91,9 @@ export default function PokemonCard({ pokemon }: PokemonCardProps) {
           </div>
           
           <div className="mt-4 text-center relative">
-            <p className="text-gray-500 dark:text-gray-400 text-sm">#{pokemon.id.toString().padStart(3, '0')}</p>
+            <p className={`${cardColor.includes('text-white') ? 'text-gray-200' : 'text-gray-600'} text-sm`}>
+              #{pokemon.id.toString().padStart(3, '0')}
+            </p>
             <h3 className="text-lg font-semibold capitalize mt-1">{pokemon.name}</h3>
             
             <div className="flex gap-2 mt-2 justify-center mb-2">

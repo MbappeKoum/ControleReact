@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Pokemon } from '@/lib/api';
+import { POKEMON_COLORS } from './PokemonCard';
 
 interface PokemonEvolutionProps {
   evolutions: Pokemon[];
@@ -32,7 +33,11 @@ export default function PokemonEvolution({
               <div 
                 className={`
                   p-4 rounded-lg transition-transform duration-300 hover:scale-105
-                  ${pokemon.id === currentPokemonId ? 'bg-blue-100 dark:bg-blue-900' : 'bg-gray-100 dark:bg-gray-700'}
+                  ${pokemon.id === currentPokemonId 
+                    ? (pokemon.color && POKEMON_COLORS[pokemon.color] 
+                        ? POKEMON_COLORS[pokemon.color] 
+                        : 'bg-blue-100 dark:bg-blue-900')
+                    : 'bg-gray-100 dark:bg-gray-700'}
                 `}
               >
                 <div className="flex flex-col items-center">
@@ -47,7 +52,13 @@ export default function PokemonEvolution({
                   </div>
                   
                   <div className="mt-2 text-center">
-                    <p className="text-xs text-gray-500 dark:text-gray-400">#{pokemon.id.toString().padStart(3, '0')}</p>
+                    <p className={`text-xs ${
+                      pokemon.id === currentPokemonId && pokemon.color && POKEMON_COLORS[pokemon.color]?.includes('text-white')
+                        ? 'text-gray-200'
+                        : 'text-gray-500 dark:text-gray-400'
+                    }`}>
+                      #{pokemon.id.toString().padStart(3, '0')}
+                    </p>
                     <h4 className="text-sm font-medium capitalize">{pokemon.name}</h4>
                   </div>
                 </div>

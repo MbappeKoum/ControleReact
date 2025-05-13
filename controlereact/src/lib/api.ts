@@ -34,6 +34,7 @@ export interface Pokemon {
   name: string;
   image: string;
   types: PokemonType[];
+  color?: string;
 }
 
 export interface PokemonDetail extends Pokemon {
@@ -146,12 +147,19 @@ export async function fetchPokemons({
       
       const types = await Promise.all(typePromises);
       
+      // Get Pokemon color from species data
+      let color = '';
+      if (species && species.color && species.color.name) {
+        color = species.color.name;
+      }
+      
       return {
         id: pokemon.id,
         name: name,
         image: pokemon.sprites.other?.['official-artwork']?.front_default || 
                pokemon.sprites.front_default,
-        types: types
+        types: types,
+        color: color
       };
     });
     
@@ -256,6 +264,7 @@ export async function fetchPokemonById(id: string | number): Promise<PokemonDeta
     
     
     let name = pokemon.name;
+    let color = '';
     try {
       const speciesResponse = await fetch(pokemon.species.url, fetchOptions);
       const speciesData = await speciesResponse.json();
@@ -265,6 +274,10 @@ export async function fetchPokemonById(id: string | number): Promise<PokemonDeta
         if (frenchName) {
           name = frenchName.name;
         }
+      }
+      
+      if (speciesData.color && speciesData.color.name) {
+        color = speciesData.color.name;
       }
     } catch (error) {
       console.error('Error fetching Pokemon species data:', error);
@@ -280,6 +293,7 @@ export async function fetchPokemonById(id: string | number): Promise<PokemonDeta
       evolutions: evolutions,
       height: pokemon.height,
       weight: pokemon.weight,
+      color: color
     };
   } catch (error) {
     console.error('Error fetching pokemon details:', error);
@@ -310,6 +324,7 @@ async function processEvolutionChain(chain: any): Promise<Pokemon[]> {
         
         
         let name = pokemon.name;
+        let color = '';
         try {
           const speciesResponse = await fetch(pokemon.species.url, fetchOptions);
           const speciesData = await speciesResponse.json();
@@ -319,6 +334,10 @@ async function processEvolutionChain(chain: any): Promise<Pokemon[]> {
             if (frenchName) {
               name = frenchName.name;
             }
+          }
+          
+          if (speciesData.color && speciesData.color.name) {
+            color = speciesData.color.name;
           }
         } catch (error) {
           console.error(`Error fetching evolution pokemon species data for ${id}:`, error);
@@ -355,7 +374,8 @@ async function processEvolutionChain(chain: any): Promise<Pokemon[]> {
           name: name,
           image: pokemon.sprites.other?.['official-artwork']?.front_default || 
                  pokemon.sprites.front_default,
-          types: types
+          types: types,
+          color: color
         });
       } catch (error) {
         console.error(`Error fetching evolution pokemon ${id}:`, error);

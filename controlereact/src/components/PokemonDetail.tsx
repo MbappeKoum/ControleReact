@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { PokemonDetail as PokemonDetailType, fetchPokemonById, TYPE_COLORS } from '@/lib/api';
 import PokemonStats from './PokemonStats';
 import PokemonEvolution from './PokemonEvolution';
+import { POKEMON_COLORS } from './PokemonCard';
 
 interface PokemonDetailProps {
   pokemonId: string;
@@ -76,7 +77,7 @@ export default function PokemonDetail({ pokemonId }: PokemonDetailProps) {
         Back to Pokemon List
       </Link>
       
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden mb-8">
+      <div className={`${pokemon.color && POKEMON_COLORS[pokemon.color] ? POKEMON_COLORS[pokemon.color] : 'bg-white dark:bg-gray-800'} rounded-lg shadow-lg overflow-hidden mb-8`}>
         <div className="p-6 md:p-8">
           <div className="flex flex-col md:flex-row md:items-center">
             <div className="relative w-full md:w-1/3 h-64 md:h-80">
@@ -93,7 +94,7 @@ export default function PokemonDetail({ pokemonId }: PokemonDetailProps) {
             <div className="md:w-2/3 md:pl-8 mt-6 md:mt-0">
               <div className="flex items-center mb-4">
                 <h1 className="text-3xl font-bold capitalize mr-4">{pokemon.name}</h1>
-                <span className="text-gray-500 dark:text-gray-400 text-xl">
+                <span className={`${pokemon.color && POKEMON_COLORS[pokemon.color]?.includes('text-white') ? 'text-gray-200' : 'text-gray-500 dark:text-gray-400'} text-xl`}>
                   #{pokemon.id.toString().padStart(3, '0')}
                 </span>
               </div>
