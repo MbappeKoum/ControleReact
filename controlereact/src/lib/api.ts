@@ -108,7 +108,7 @@ export async function fetchPokemons({
     
     const pokemonSpecies = await Promise.all(pokemonSpeciesPromises);
     
-    const pokemons = validPokemonDetails.map((pokemon: any, index: number) => {
+    const pokemonPromises = validPokemonDetails.map(async (pokemon: any, index: number) => {
       let name = pokemon.name;
       const species = pokemonSpecies[index];
       
@@ -119,18 +119,43 @@ export async function fetchPokemons({
         }
       }
       
+      
+      const typePromises = pokemon.types.map(async (t: { type: { url: string; name: string } }) => {
+        const id = extractIdFromUrl(t.type.url);
+        let name = t.type.name;
+        
+        try {
+          const typeResponse = await fetch(t.type.url, fetchOptions);
+          const typeData = await typeResponse.json();
+          
+          if (typeData.names) {
+            const frenchName = typeData.names.find((n: any) => n.language.name === LANGUAGE);
+            if (frenchName) {
+              name = frenchName.name;
+            }
+          }
+        } catch (error) {
+          console.error(`Error fetching type details for ${t.type.name}:`, error);
+        }
+        
+        return {
+          id,
+          name
+        };
+      });
+      
+      const types = await Promise.all(typePromises);
+      
       return {
         id: pokemon.id,
         name: name,
         image: pokemon.sprites.other?.['official-artwork']?.front_default || 
                pokemon.sprites.front_default,
-        types: pokemon.types.map((t: { type: { url: string; name: string } }) => ({
-          id: extractIdFromUrl(t.type.url),
-          name: t.type.name
-        }))
+        types: types
       };
     });
     
+    const pokemons = await Promise.all(pokemonPromises);
     let filteredPokemons = pokemons;
     if (name) {
       filteredPokemons = filteredPokemons.filter(p => 
@@ -173,15 +198,45 @@ export async function fetchPokemonById(id: string | number): Promise<PokemonDeta
     const response = await fetch(`${API_BASE_URL}/pokemon/${id}`, fetchOptions);
     const pokemon = await response.json();
     
+    const statNames: Record<string, string> = {
+      'hp': 'PV',
+      'attack': 'Attaque',
+      'defense': 'Défense',
+      'special-attack': 'Attaque Spéciale',
+      'special-defense': 'Défense Spéciale',
+      'speed': 'Vitesse'
+    };
+    
     const stats = pokemon.stats.map((stat: {stat: {name: string}, base_stat: number}) => ({
-      name: stat.stat.name,
+      name: statNames[stat.stat.name] || stat.stat.name,
       value: stat.base_stat
     }));
     
-    const types = pokemon.types.map((t: { type: { url: string; name: string } }) => ({
-      id: extractIdFromUrl(t.type.url),
-      name: t.type.name
-    }));
+    const typePromises = pokemon.types.map(async (t: { type: { url: string; name: string } }) => {
+      const id = extractIdFromUrl(t.type.url);
+      let name = t.type.name;
+      
+      try {
+        const typeResponse = await fetch(t.type.url, fetchOptions);
+        const typeData = await typeResponse.json();
+        
+        if (typeData.names) {
+          const frenchName = typeData.names.find((n: any) => n.language.name === LANGUAGE);
+          if (frenchName) {
+            name = frenchName.name;
+          }
+        }
+      } catch (error) {
+        console.error(`Error fetching type details for ${t.type.name}:`, error);
+      }
+      
+      return {
+        id,
+        name
+      };
+    });
+    
+    const types = await Promise.all(typePromises);
     
     let evolutions: Pokemon[] = [];
     
@@ -269,15 +324,38 @@ async function processEvolutionChain(chain: any): Promise<Pokemon[]> {
           console.error(`Error fetching evolution pokemon species data for ${id}:`, error);
         }
         
+        const typePromises = pokemon.types.map(async (t: { type: { url: string; name: string } }) => {
+          const id = extractIdFromUrl(t.type.url);
+          let name = t.type.name;
+          
+          try {
+            const typeResponse = await fetch(t.type.url, fetchOptions);
+            const typeData = await typeResponse.json();
+            
+            if (typeData.names) {
+              const frenchName = typeData.names.find((n: any) => n.language.name === LANGUAGE);
+              if (frenchName) {
+                name = frenchName.name;
+              }
+            }
+          } catch (error) {
+            console.error(`Error fetching type details for ${t.type.name}:`, error);
+          }
+          
+          return {
+            id,
+            name
+          };
+        });
+        
+        const types = await Promise.all(typePromises);
+        
         evolutions.push({
           id: pokemon.id,
           name: name,
           image: pokemon.sprites.other?.['official-artwork']?.front_default || 
                  pokemon.sprites.front_default,
-          types: pokemon.types.map((t: {type: {url: string, name: string}}) => ({
-            id: extractIdFromUrl(t.type.url),
-            name: t.type.name
-          }))
+          types: types
         });
       } catch (error) {
         console.error(`Error fetching evolution pokemon ${id}:`, error);
@@ -304,13 +382,33 @@ export async function fetchPokemonTypes(): Promise<PokemonType[]> {
     const data = await response.json();
     console.log('Pokemon types API response:', data);
     
-    const types = data.results
+    const typePromises = data.results
       .filter((type: {name: string}) => type.name !== 'unknown' && type.name !== 'shadow')
-      .map((type: {name: string, url: string}) => ({
-        id: extractIdFromUrl(type.url),
-        name: type.name
-      }));
+      .map(async (type: {name: string, url: string}) => {
+        const id = extractIdFromUrl(type.url);
+        let name = type.name;
+        
+        try {
+          const typeResponse = await fetch(type.url, fetchOptions);
+          const typeData = await typeResponse.json();
+          
+          if (typeData.names) {
+            const frenchName = typeData.names.find((n: any) => n.language.name === LANGUAGE);
+            if (frenchName) {
+              name = frenchName.name;
+            }
+          }
+        } catch (error) {
+          console.error(`Error fetching type details for ${type.name}:`, error);
+        }
+        
+        return {
+          id,
+          name
+        };
+      });
     
+    const types = await Promise.all(typePromises);
     console.log('Processed Pokemon types:', types);
     return types;
   } catch (error) {

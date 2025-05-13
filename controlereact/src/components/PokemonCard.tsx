@@ -1,4 +1,4 @@
-uimport { useState } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Pokemon, TYPE_COLORS } from '@/lib/api';
